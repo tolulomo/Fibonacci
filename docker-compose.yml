@@ -1,0 +1,66 @@
+version: '3'
+
+services: 
+    redis:
+        image: 'redis'
+    postgres: 
+        image: 'postgres:alpine'
+    nginx:
+        restart: always
+        build:
+            context: ./nginx
+            dockerfile: Dockerfile.dev
+        ports: 
+            - "4000:80"
+    client:
+        # . is a context
+        build:
+            context: ./client
+            dockerfile: Dockerfile.dev
+        volumes: 
+            - /app/node_modules
+            - ./client:/app
+    api: 
+        build: 
+            context: ./server
+            dockerfile: Dockerfile.dev
+        volumes: 
+            - /app/node_modules
+            - ./server:/app
+        environment: 
+            # Environment variables can be store in the computer and called 
+            # instead of entering it. 
+            # E.g. variableName instead of variableName=value
+            # i.e. REDIS_HOST instead of REDIS_HOST=redis
+
+            # We inserted redis as value because that was the container name created
+            # in this container build context. Same for Postgres except for pass,port and username
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - PGUSER=postgres
+            - PGHOST=postgres
+            - PGDATABASE=postgres
+            - PGPASSWORD=postgres_password
+            - PGPORT=5432
+
+        # Add this line if postgres is not working
+        depends_on: 
+            - postgres
+    worker:
+        build: 
+            context: ./worker
+            dockerfile: Dockerfile.dev
+        volumes: 
+            - /app/node_modules
+            - ./worker:/app
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+    # test:
+    #     build:
+    #         context: ./client
+    #         dockerfile: Dockerfile.dev
+    #     volumes: 
+    #         - /app/node_modules
+    #         - ./client:/app
+    #     command: ["npm", "run", "test"]
