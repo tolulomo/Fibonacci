@@ -10,7 +10,7 @@ before_install:
     # - docker build -t tfatex/server-test -f ./server/Dockerfile.dev
 
 script:
-    - docker run tfatex/client-test npm run test -- -- coverage
+    - docker run -e CI=true tfatex/client-test npm test -- --coverage
     # If the above is enabled, then we can enable and run the lines below
     # - docker run tfatex/server-test npm run test -- -- coverage
 
