@@ -1,0 +1,31 @@
+sudo: required
+
+services:
+    # What is needed to run travis. 
+    - docker
+
+before_install:
+    - docker build -t tfatex/client-test -f ./client/Dockerfile.dev
+    # Let say you have a test to run inside the server folder app we can also add this
+    # - docker build -t tfatex/server-test -f ./server/Dockerfile.dev
+
+script:
+    - docker run tfatex/client-test npm run test -- -- coverage
+    # If the above is enabled, then we can enable and run the lines below
+    # - docker run tfatex/server-test npm run test -- -- coverage
+
+after_success:
+    - docker build -t tfatex/fibapp-client ./client
+    - docker build -t tfatex/fibapp-nginx ./nginx
+    - docker build -t tfatex/fibapp-server ./server
+    - docker build -t tfatex/fibapp-worker ./worker
+
+    # Since travis will push images built to docker hub we need to do the following:
+    # LOGIN INTO DOCKER CLI
+    - echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_ID" --password-stdin
+    # TAKE THOSE IMAGES AND PUSH THEM TO DOCKER HUB
+    - docker push tfatex/fibapp-client
+    - docker push fatex/fibapp-nginx
+    - docker push tfatex/fibapp-server
+    - docker push tfatex/fibapp-worker
+
