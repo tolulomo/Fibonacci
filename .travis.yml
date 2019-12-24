@@ -24,7 +24,7 @@ after_success:
 
     # Since travis will push images built to docker hub we need to do the following:
     # LOGIN INTO DOCKER CLI
-    - echo "$DOCKER_PASSWORD" | docker login -u "DOCKER_ID" --password-stdin
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
     # TAKE THOSE IMAGES AND PUSH THEM TO DOCKER HUB
     - docker push tfatex/fibapp-client
     - docker push tfatex/fibapp-nginx
